@@ -44,6 +44,7 @@
     "chai": "^2.2.0",
     "chai-as-promised": "^4.3.0",
     "gulp": "^3.8.11",
+    "gulp-tap": "^0.1.3",
     "mochawait": "^2.0.0",
     "yargs": "^3.7.1"
   },

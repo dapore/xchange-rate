@@ -13,6 +13,7 @@ gulp.task('copy:data', function () {
 
 boilerplate({
   extraDefaultTasks: ['copy:data'],
+  extraPrepublishTasks: ['copy:data'],
   build: 'turtle',
   jscs: false,
   jshint: false});

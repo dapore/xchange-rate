@@ -7,4 +7,4 @@ This change log follows the conventions of
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/makenew/npm-package/compare/v0.0.0...HEAD
+[Unreleased]: https://github.com//xchange-rate/compare/v...HEAD

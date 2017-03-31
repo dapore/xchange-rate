@@ -3,8 +3,9 @@ import request from 'request'
 import data from './data.json'
 
 export class Client {
-  _GOOGLE_FINANCE_API_PATH = `https://www.google.com/finance/converter?a=1&from=`
-  constructor() {}
+  constructor() {
+    this._GOOGLE_FINANCE_API_PATH = `https://www.google.com/finance/converter?a=1&from=`
+  }
   async makeGetRequest(path) {
     return new Promise((resolve, reject) => {
       request(path, (error, resp, body) => {
@@ -32,5 +33,5 @@ export class Client {
 }
 
 export default () => {
-  return new Client({})
+  return new Client()
 }

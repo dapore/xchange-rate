@@ -30,6 +30,17 @@ export class Client {
   async getCurrencies() {
     return data
   }
+
+  async getCurrencyInfo(query) {
+    query = query.toLowerCase()
+    return data
+      .find( currency =>
+      currency.code.toLowerCase() === query ||
+      currency.symbol.toLowerCase()  === query ||
+      currency.symbol_native.toLowerCase()  === query ||
+      currency.name_plural.toLowerCase()  === query ||
+      currency.symbol_native.toLowerCase()  === query )
+  }
 }
 
 export default () => {

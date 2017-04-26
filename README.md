@@ -12,9 +12,42 @@ import xChanger from '@swapbills/xchange-rate'
 
 const xChangeService = xChanger()
 
-const listAllCurrencies = xChangeService.getCurrencies()
+const listAllCurrencies = await xChangeService.getCurrencies()
+/*
+ [{
+  "symbol":"AED",
+  "name":"United Arab Emirates Dirham",
+  "symbol_native":"د.إ.‏",
+  "decimal_digits":2,
+  "rounding":0,
+  "code":"AED",
+  "name_plural":"UAE dirhams"
+}, ... ] about 168 objects in  a list
+*/
+const dollarInfo = await xChangeService.getCurrencyInfo('usd')
+/*
+{
+  "symbol":"$",
+  "name":"US Dollar",
+  "symbol_native":"$",
+  "decimal_digits":2,
+  "rounding":0,
+  "code":"USD",
+  "name_plural":"US dollars"
+}
+*/
 
-const dollar = xChangeService.getCurrencyInfo('usd')
+const dollarToCediRate = await xChangeService.getRate('ghs','usd')
+/*
+  4.30
+*/
+
+const chartUri = await xChangeService.getUri('ghs','usd')
+/*
+  https://www.google.com/finance/getchart?x=CURRENCY&p=1Y&i=86400&q=GHSUSD
+*/ visit this uri and you see a trend chart
+
+
 ```
 
 
@@ -101,4 +134,3 @@ loss of use, data, or profits; or business interruption) however caused and on
 any theory of liability, whether in contract, strict liability, or tort
 (including negligence or otherwise) arising in any way out of the use of this
 software, even if advised of the possibility of such damage.
-

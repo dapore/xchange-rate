@@ -3,9 +3,23 @@ import request from 'request'
 import data from './data.json'
 
 export class Client {
-  constructor() {
-    this._GOOGLE_FINANCE_API_PATH = `https://www.google.com/finance/converter?a=1&from=`
+
+  _API_BASE = `https://www.google.com/finance/`
+
+  _paths = {
+    converter: `converter?a=1&from=`,
+    chart: `getchart?x=CURRENCY&p=1Y&i=86400&q=`
   }
+
+  constructor() {}
+
+  getUri(path) {
+    if (!this._paths[path]) {
+      throw new Error('PathDoesntExistException')
+    }
+    return `${this._API_BASE}${this._paths[path]}`
+  }
+
   async makeGetRequest(path) {
     return new Promise((resolve, reject) => {
       request(path, (error, resp, body) => {
@@ -15,7 +29,7 @@ export class Client {
   }
 
   async getRate(baseCurrency, destCurrency) {
-    const path = `${this._GOOGLE_FINANCE_API_PATH}${baseCurrency}&to=${destCurrency}`
+    const path = `${this.getUri('converter')}${baseCurrency}&to=${destCurrency}`
     return await this.makeGetRequest(path)
       .then(function (body) {
         const $ = cheerio.load(body)
@@ -40,6 +54,10 @@ export class Client {
       currency.symbol_native.toLowerCase()  === query ||
       currency.name_plural.toLowerCase()  === query ||
       currency.symbol_native.toLowerCase()  === query )
+  }
+
+  async getChartUri(baseCurrency, destCurrency) {
+    return `${this.getUri('chart')}${baseCurrency.toUpperCase()}${destCurrency.toUpperCase()}`
   }
 }
 

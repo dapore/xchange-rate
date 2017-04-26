@@ -42,7 +42,7 @@ const dollarToCediRate = await xChangeService.getRate('ghs','usd')
   4.30
 */
 
-const chartUri = await xChangeService.getUri('ghs','usd')
+const chartUri = await xChangeService.getChartUri('ghs','usd')
 /*
   https://www.google.com/finance/getchart?x=CURRENCY&p=1Y&i=86400&q=GHSUSD
 */ visit this uri and you see a trend chart

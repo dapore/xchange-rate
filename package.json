@@ -1,6 +1,6 @@
 {
   "name": "@swapbills/xchange-rate",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "A simple wrapper around google finance API for retrieving the exchange rate between two currencies, use at your own risk.",
   "main": "lib/index.js",
   "keywords": [

@@ -28,8 +28,8 @@ export class Client {
     })
   }
 
-  async getRate(baseCurrency, destCurrency) {
-    const path = `${this.getUri('converter')}${baseCurrency}&to=${destCurrency}`
+  async getRate(baseCurrency, destCurrency, proxyUrl = '') {
+    const path = `${proxyUrl}${this.getUri('converter')}${baseCurrency}&to=${destCurrency}`
     return await this.makeGetRequest(path)
       .then(function (body) {
         const $ = cheerio.load(body)
@@ -56,8 +56,8 @@ export class Client {
       currency.symbol_native.toLowerCase()  === query )
   }
 
-  async getChartUri(baseCurrency, destCurrency) {
-    return `${this.getUri('chart')}${baseCurrency.toUpperCase()}${destCurrency.toUpperCase()}`
+  async getChartUri(baseCurrency, destCurrency, proxyUrl) {
+    return `${proxyUrl}${this.getUri('chart')}${baseCurrency.toUpperCase()}${destCurrency.toUpperCase()}`
   }
 }
 

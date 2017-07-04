@@ -4,14 +4,13 @@ import data from './data.json'
 
 export class Client {
 
-  _API_BASE = `https://www.google.com/finance/`
-
-  _paths = {
-    converter: `converter?a=1&from=`,
-    chart: `getchart?x=CURRENCY&p=1Y&i=86400&q=`
+  constructor() {
+    this._API_BASE = `https://www.google.com/finance/`
+    this._paths = {
+      converter: `converter?a=1&from=`,
+      chart: `getchart?x=CURRENCY&p=1Y&i=86400&q=`
+    }
   }
-
-  constructor() {}
 
   getUri(path) {
     if (!this._paths[path]) {
@@ -56,7 +55,7 @@ export class Client {
       currency.symbol_native.toLowerCase()  === query )
   }
 
-  async getChartUri(baseCurrency, destCurrency, proxyUrl) {
+  async getChartUri(baseCurrency, destCurrency, proxyUrl = '') {
     return `${proxyUrl}${this.getUri('chart')}${baseCurrency.toUpperCase()}${destCurrency.toUpperCase()}`
   }
 }

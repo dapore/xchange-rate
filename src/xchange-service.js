@@ -27,22 +27,33 @@ export class Client {
     })
   }
 
-  async getRate(baseCurrency, destCurrency, proxyUrl = '') {
+  async getRateMeta(baseCurrency, destCurrency, proxyUrl = '') {
     const path = `${proxyUrl}${this.getUri('converter')}${baseCurrency}&to=${destCurrency}`
     return await this.makeGetRequest(path)
       .then(function (body) {
         const $ = cheerio.load(body)
+        const meta = $('input[name="meta"]').val()
+        if (meta) { return meta }
+        throw new Error('InvalidMetaDataReceived')
+    })
+  }
+
+  async getRate(baseCurrency, destCurrency, proxyUrl = '') {
+    const path = `${proxyUrl}${this.getUri('converter')}${baseCurrency}&to=${destCurrency}`
+    const meta = await this.getRateMeta(baseCurrency, destCurrency, proxyUrl)
+
+    return await this.makeGetRequest(`${path}&meta=${encodeURIComponent(meta)}`)
+      .then(function (body) {
+        const $ = cheerio.load(body)
         const html = $('#currency_converter_result .bld').html();
-        if (html.indexOf(' ') ) {
+        if (html && html.indexOf(' ') > -1) {
           return parseFloat(html.split(' ')[0]);
         }
         throw new Error('InvalidDataReceived')
     })
   }
 
-  async getCurrencies() {
-    return data
-  }
+  async getCurrencies() { return data }
 
   async getCurrencyInfo(query) {
     query = query.toLowerCase()
@@ -60,6 +71,4 @@ export class Client {
   }
 }
 
-export default () => {
-  return new Client()
-}
+export default () => new Client()

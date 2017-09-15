@@ -3,8 +3,7 @@ import request from 'request'
 import data from './data.json'
 
 export class Client {
-
-  constructor() {
+  constructor () {
     this._API_BASE = `https://www.google.com/finance/`
     this._paths = {
       converter: `converter?a=1&from=`,
@@ -12,61 +11,61 @@ export class Client {
     }
   }
 
-  getUri(path) {
+  getUri (path) {
     if (!this._paths[path]) {
       throw new Error('PathDoesntExistException')
     }
     return `${this._API_BASE}${this._paths[path]}`
   }
 
-  async makeGetRequest(path) {
+  async makeGetRequest (path) {
     return new Promise((resolve, reject) => {
       request(path, (error, resp, body) => {
-        return error ? reject(error) : resolve(body ? body : resp);
+        return error ? reject(error) : resolve(body || resp)
       })
     })
   }
 
-  async getRateMeta(baseCurrency, destCurrency, proxyUrl = '') {
+  async getRateMeta (baseCurrency, destCurrency, proxyUrl = '') {
     const path = `${proxyUrl}${this.getUri('converter')}${baseCurrency}&to=${destCurrency}`
-    return await this.makeGetRequest(path)
+    return this.makeGetRequest(path)
       .then(function (body) {
         const $ = cheerio.load(body)
         const meta = $('input[name="meta"]').val()
         if (meta) { return meta }
         throw new Error('InvalidMetaDataReceived')
-    })
+      })
   }
 
-  async getRate(baseCurrency, destCurrency, proxyUrl = '') {
+  async getRate (baseCurrency, destCurrency, proxyUrl = '') {
     const path = `${proxyUrl}${this.getUri('converter')}${baseCurrency}&to=${destCurrency}`
     const meta = await this.getRateMeta(baseCurrency, destCurrency, proxyUrl)
 
-    return await this.makeGetRequest(`${path}&meta=${encodeURIComponent(meta)}`)
+    return this.makeGetRequest(`${path}&meta=${encodeURIComponent(meta)}`)
       .then(function (body) {
         const $ = cheerio.load(body)
-        const html = $('#currency_converter_result .bld').html();
+        const html = $('#currency_converter_result .bld').html()
         if (html && html.indexOf(' ') > -1) {
-          return parseFloat(html.split(' ')[0]);
+          return parseFloat(html.split(' ')[0])
         }
         throw new Error('InvalidDataReceived')
-    })
+      })
   }
 
-  async getCurrencies() { return data }
+  async getCurrencies () { return data }
 
-  async getCurrencyInfo(query) {
+  async getCurrencyInfo (query) {
     query = query.toLowerCase()
     return data
-      .find( currency =>
+      .find(currency =>
       currency.code.toLowerCase() === query ||
-      currency.symbol.toLowerCase()  === query ||
-      currency.symbol_native.toLowerCase()  === query ||
-      currency.name_plural.toLowerCase()  === query ||
-      currency.symbol_native.toLowerCase()  === query )
+      currency.symbol.toLowerCase() === query ||
+      currency.symbol_native.toLowerCase() === query ||
+      currency.name_plural.toLowerCase() === query ||
+      currency.symbol_native.toLowerCase() === query)
   }
 
-  async getChartUri(baseCurrency, destCurrency, proxyUrl = '') {
+  async getChartUri (baseCurrency, destCurrency, proxyUrl = '') {
     return `${proxyUrl}${this.getUri('chart')}${baseCurrency.toUpperCase()}${destCurrency.toUpperCase()}`
   }
 }

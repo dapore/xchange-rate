@@ -3,8 +3,9 @@ import nock from 'nock'
 import { Client, default as getXchangeService } from '../src/xchange-service'
 
 test.beforeEach(async t => {
-  t.context.conversionPath = `https://www.google.com/finance/converter?a=1&from=`
-  t.context.chartPath = `https://www.google.com/finance/getchart?x=CURRENCY&p=1Y&i=86400&q=`
+  t.context.googleApi = `https://finance.google.com/finance`
+  t.context.conversionPath = `${t.context.googleApi}/converter`
+  t.context.chartPath = `${t.context.googleApi}/getchart`
   t.context.api = `https://www.example.com`
   t.context.currentRate = 4.45
   t.context.currencies = [{
@@ -45,7 +46,7 @@ test('Can make request', async t => {
     .get(`/api/currencies/rate`)
     .reply(200, t.context.currentRate)
   const xchangeService = new Client()
-  const rate = await xchangeService.makeGetRequest(`${t.context.api}/api/currencies/rate`)
+  const rate = await xchangeService.getFromRemote(`${t.context.api}/api/currencies/rate`)
   t.is(parseFloat(rate), t.context.currentRate, `Rate must be ${t.context.currentRate}`)
 })
 
@@ -55,7 +56,7 @@ test('MakeRequest can throw', async t => {
     .replyWithError({msg: `there was an error`})
   const xchangeService = new Client()
   try {
-    await xchangeService.makeGetRequest(`${t.context.api}/api/error`)
+    await xchangeService.getFromRemote(`${t.context.api}/api/error`)
   } catch (error) {
     t.pass(`makeRequest must be able to throw`)
   }
@@ -63,42 +64,15 @@ test('MakeRequest can throw', async t => {
     .get(`/api/error`)
     .reply(200, null)
   try {
-    await xchangeService.makeGetRequest(`${t.context.api}/api/error`)
+    await xchangeService.getFromRemote(`${t.context.api}/api/error`)
   } catch (error) {
     t.pass(`makeRequest must be able to throw`)
   }
 })
 
-test('Get rateMetaData', async t => {
-  const meta = `meta`
-  nock(`https://www.google.com/finance`)
-    .get(`/converter?a=1&from=usd&to=ghs`)
-    .reply(200, `<html><body><input name=meta value="${meta}" /></body</html>`)
-  const xchangeService = new Client()
-  const res = await xchangeService.getRateMeta('usd', 'ghs')
-  t.is(res, meta, `Must return rate meta`)
-})
-
-test('Get rateMetaData throws', async t => {
-  nock(`https://www.google.com/finance`)
-    .get(`/converter?a=1&from=usd&to=ghs`)
-    .reply(200, `<html></html>`)
-  const xchangeService = new Client()
-  try {
-    await xchangeService.getRateMeta('usd', 'ghs')
-  } catch (error) {
-    t.pass(`Must throw on bad data`)
-  }
-})
-
-test('Get rate rate', async t => {
-  const meta = `meta`
-  nock(`https://www.google.com/finance`)
-    .get(`/converter?a=1&from=usd&to=ghs`)
-    .reply(200, `<html><body><input name=meta value="${meta}" /></body></html>`)
-
-  nock(`https://www.google.com/finance`)
-      .get(`/converter?a=1&from=usd&to=ghs&meta=${meta}`)
+test('Get rate', async t => {
+  nock(t.context.googleApi)
+      .get(`/converter?a=1&from=usd&to=ghs`)
       .reply(200, `<html>
                     <body>
                       <div id="currency_converter_result">
@@ -113,13 +87,8 @@ test('Get rate rate', async t => {
 })
 
 test('Get rate can throw', async t => {
-  const meta = `meta`
-  nock(`https://www.google.com/finance`)
-    .get(`/converter?a=1&from=usd&to=ghs`)
-    .reply(200, `<html><body><input name=meta value="${meta}" /></body></html>`)
-
-  nock(`https://www.google.com/finance`)
-      .get(`/converter?a=1&from=usd&to=ghs&meta=${meta}`)
+  nock(t.context.googleApi)
+      .get(`/converter?a=1&from=usd&to=ghs`)
       .reply(200, `<html></html>`)
 
   const xchangeService = new Client()

@@ -4,10 +4,10 @@ import data from './data.json'
 
 export class Client {
   constructor () {
-    this._API_BASE = `https://www.google.com/finance/`
+    this._API_BASE = `https://finance.google.com/finance/`
     this._paths = {
-      converter: `converter?a=1&from=`,
-      chart: `getchart?x=CURRENCY&p=1Y&i=86400&q=`
+      converter: `converter`, // ?a=1&from`,
+      chart: `getchart` // ?x=CURRENCY&p=1Y&i=86400&q=`
     }
   }
 
@@ -18,30 +18,25 @@ export class Client {
     return `${this._API_BASE}${this._paths[path]}`
   }
 
-  async makeGetRequest (path) {
+  async getFromRemote (options) {
     return new Promise((resolve, reject) => {
-      request(path, (error, resp, body) => {
+      request(options, (error, resp, body) => {
         return error ? reject(error) : resolve(body || resp)
       })
     })
   }
 
-  async getRateMeta (baseCurrency, destCurrency, proxyUrl = '') {
-    const path = `${proxyUrl}${this.getUri('converter')}${baseCurrency}&to=${destCurrency}`
-    return this.makeGetRequest(path)
-      .then(function (body) {
-        const $ = cheerio.load(body)
-        const meta = $('input[name="meta"]').val()
-        if (meta) { return meta }
-        throw new Error('InvalidMetaDataReceived')
-      })
-  }
-
   async getRate (baseCurrency, destCurrency, proxyUrl = '') {
-    const path = `${proxyUrl}${this.getUri('converter')}${baseCurrency}&to=${destCurrency}`
-    const meta = await this.getRateMeta(baseCurrency, destCurrency, proxyUrl)
-
-    return this.makeGetRequest(`${path}&meta=${encodeURIComponent(meta)}`)
+    const path = `${proxyUrl}${this.getUri('converter')}`// `${baseCurrency}&to=${destCurrency}`
+    return this.getFromRemote({
+      url: path,
+      qs: { a: '1', from: baseCurrency, to: destCurrency },
+      headers: {
+        'swapBills-token': Date.now(),
+        'postman-token': '2cdab2a1-a6ef-33ec-7509-0ab90de6f802',
+        'cache-control': 'no-cache'
+      }
+    })
       .then(function (body) {
         const $ = cheerio.load(body)
         const html = $('#currency_converter_result .bld').html()
@@ -66,7 +61,7 @@ export class Client {
   }
 
   async getChartUri (baseCurrency, destCurrency, proxyUrl = '') {
-    return `${proxyUrl}${this.getUri('chart')}${baseCurrency.toUpperCase()}${destCurrency.toUpperCase()}`
+    return `${proxyUrl}${this.getUri('chart')}?x=CURRENCY&p=1Y&i=86400&q=${baseCurrency.toUpperCase()}${destCurrency.toUpperCase()}`
   }
 }
 
